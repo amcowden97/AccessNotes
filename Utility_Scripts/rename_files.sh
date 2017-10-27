@@ -2,7 +2,7 @@
 
 #This script is a tool to simply rename regular files
 #found within a directory and subdirectory and make all the spaces
-#or dashes replaced with underscore characters
+#or dashes replaced with underscore characters as well as enforce other semantics described below
 
 
 #Error Constants
@@ -30,7 +30,6 @@ fi
 
 #Directory Argument Handler
 if [ ! -d "$1" ]; then
-
 	error_function $INVAL_DIR
 fi
 
@@ -48,20 +47,27 @@ for file in ${1}/*; do
 	pathless_name="$(basename "$file")"
 	file_name="${pathless_name%.*}"
 	extension="${file##*.}"
-
-	#Convert All to Lowercase
-	lowercase=$(echo "$file_name" | sed 's/\(.*\)/\L\1/')
 	
-	#Capitalize the first letter of Each word
-	capital_words=$(echo $lowercase | sed -e 's/\b\(.\)/\u\1/g' -e 's/[^ _-]*/\u&/g')
+	#Convert to Spaces for Special Character Recongnition in Following sed Satement
+	space_case=$(echo "$file_name" | sed 's/_/\ /')
 	
+	#Convert to Title Case with Apostrophe Capabilites
+	title_case=$(echo "$space_case" | sed 's/.*/\L&/; s/[[:graph:]]*/\u&/g')
+		
 	#Replace Spaces and Dashes with Underscores
-	remove_spaces=$(echo $capital_words | sed -e 's/[\ \-]/\_/g' -e 's/\_\./\./g')
+	remove_spaces=$(echo $title_case | sed -e 's/[\ \-]/\_/g' -e 's/\_\./\./g')
 	
 	#New Filename Format
-	new_file=${1}/$remove_spaces.$extension
-
-
+	case "$pathless_name" in
+	*\.*)
+		new_file=${1}/$remove_spaces.$extension		#Contains Extension
+		;;
+	*)
+		new_file=${1}/$remove_spaces				#Does not Contain Extension
+		;;
+	esac
+	
+	#Rename Files
 	if [ ! -a "$new_file" ] && [ "$file" != "$new_file" ]; then
 		if [ -d "$file" ]; then				#Directory Call
 			mv "$file" $new_file 
