@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#This script is a tool to simply rename regular files
+#This script is a tool to simply renamefiles
 #found within a directory and subdirectory and make all the spaces
 #or dashes replaced with underscore characters as well as enforce other semantics described below
 
@@ -49,30 +49,30 @@ for file in ${1}/*; do
 	extension="${file##*.}"
 	
 	#Convert to Spaces for Special Character Recongnition in Following sed Satement
-	space_case=$(echo "$file_name" | sed 's/_/\ /')
+	space_convert=$(echo "$file_name" | sed 's/[\_\-]/\ /g')
 	
 	#Convert to Title Case with Apostrophe Capabilites
-	title_case=$(echo "$space_case" | sed 's/.*/\L&/; s/[[:graph:]]*/\u&/g')
+	title_case=$(echo "$space_convert" | sed 's/.*/\L&/; s/[[:graph:]]*/\u&/g')
 		
 	#Replace Spaces and Dashes with Underscores
 	remove_spaces=$(echo $title_case | sed -e 's/[\ \-]/\_/g' -e 's/\_\./\./g')
 	
-	#New Filename Format
+	#New Filename Format Selector
 	case "$pathless_name" in
 	*\.*)
-		new_file=${1}/$remove_spaces.$extension		#Contains Extension
+		new_file="${1}/$remove_spaces.$extension"	#Contains Extension
 		;;
 	*)
-		new_file=${1}/$remove_spaces				#Does not Contain Extension
+		new_file="${1}/$remove_spaces"				#Does not Contain Extension
 		;;
 	esac
 	
 	#Rename Files
 	if [ ! -a "$new_file" ] && [ "$file" != "$new_file" ]; then
 		if [ -d "$file" ]; then				#Directory Call
-			mv "$file" $new_file 
+			mv "$file" "$new_file" 
 		elif [ -f "$file" ]; then			#Regualar File Call
-			mv "$file" $new_file
+			mv "$file" "$new_file"
 		fi
 	fi
 done
