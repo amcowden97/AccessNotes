@@ -33,13 +33,20 @@ if [ ! -d "$1" ]; then
 	error_function $INVAL_DIR
 fi
 
+#Get Number of Files in Directory
+file_count=$(ls -afq | wc -l)
+((file_count=file_count-2))
+
+#Store Number of Files Completed
+completed_count=0
+
 #Renaming For Loop
 for file in ${1}/*; do
 	
 	#I have each of the following in steps to improve readability
 	#The same effect can be done in a smaller number of lines if desirable
 	#List of Operations Done
-	#	1. All Lowercase But the Leading Letter of Each Word
+	#	1. All Lowercase Characters
 	#	2. Convert All Spaces and Dashes to Underscores
 	#	3. Remove Trailing White Space Before or After Extension
 	
@@ -48,14 +55,11 @@ for file in ${1}/*; do
 	file_name="${pathless_name%.*}"
 	extension="${file##*.}"
 	
-	#Convert to Spaces for Special Character Recongnition in Following sed Satement
-	space_convert=$(echo "$file_name" | sed 's/[\_\-]/\ /g')
-	
 	#Convert to Title Case with Apostrophe Capabilites
-	title_case=$(echo "$space_convert" | sed 's/.*/\L&/; s/[[:graph:]]*/\u&/g')
+	lower_case=$(echo "$file_name" | sed 's/\(.*\)/\L\1/')
 		
 	#Replace Spaces and Dashes with Underscores
-	remove_spaces=$(echo $title_case | sed -e 's/[\ \-]/\_/g' -e 's/\_\./\./g')
+	remove_spaces=$(echo $lower_case | sed -e 's/[\ \-]/\_/g' -e 's/\_\./\./g')
 	
 	#New Filename Format Selector
 	case "$pathless_name" in
@@ -75,6 +79,13 @@ for file in ${1}/*; do
 			mv "$file" "$new_file"
 		fi
 	fi
+	
+	#Progress Bar Calculation and Display
+	((completed_count=completed_count+1))
+	percent_float=$(echo "$completed_count / $file_count * 100" | bc -l)
+	percent=$(echo "$percent_float / 1" | bc)
+	
+	
 done
 
 exit 0
