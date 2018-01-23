@@ -34,11 +34,13 @@ if [ ! -d "$1" ]; then
 fi
 
 #Get Number of Files in Directory
-file_count=$(ls -afq | wc -l)
-((file_count=file_count-2))
+file_count=$(ls $1| wc -l)
 
 #Store Number of Files Completed
 completed_count=0
+
+#Keep Terminal String in Progress Bar
+echo "\n"
 
 #Renaming For Loop
 for file in ${1}/*; do
@@ -85,7 +87,9 @@ for file in ${1}/*; do
 	percent_float=$(echo "$completed_count / $file_count * 100" | bc -l)
 	percent=$(echo "$percent_float / 1" | bc)
 	
-	
+	echo -en "\e[1A"
+	echo -e "\e[0K\rScanning and Renaming Files: ($percent%)"
+	ls -l ~/Mus
 done
 
 exit 0
