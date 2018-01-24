@@ -36,6 +36,11 @@ fi
 #Get Number of Files in Directory
 file_count=$(ls $1| wc -l)
 
+#Check if Directory is Empty
+if [ $file_count -lt 1 ]; then
+	exit 0
+fi
+
 #Store Number of Files Completed
 completed_count=0
 
@@ -63,13 +68,16 @@ for file in ${1}/*; do
 	#Replace Spaces and Dashes with Underscores
 	remove_spaces=$(echo $lower_case | sed -e 's/[\ \-]/\_/g' -e 's/\_\./\./g')
 	
+	#Remove Leading Whitespace
+	remove_leading=$(echo $remove_spaces |  sed 's/^ *//g')
+	
 	#New Filename Format Selector
 	case "$pathless_name" in
 	*\.*)
-		new_file="${1}/$remove_spaces.$extension"	#Contains Extension
+		new_file="${1}/$remove_leading.$extension"	#Contains Extension
 		;;
 	*)
-		new_file="${1}/$remove_spaces"				#Does not Contain Extension
+		new_file="${1}/$remove_leading"				#Does not Contain Extension
 		;;
 	esac
 	
@@ -89,7 +97,6 @@ for file in ${1}/*; do
 	
 	echo -en "\e[1A"
 	echo -e "\e[0K\rScanning and Renaming Files: ($percent%)"
-	ls -l ~/Mus
 done
 
 exit 0
